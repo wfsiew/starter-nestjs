@@ -20,7 +20,6 @@ export class AppController {
 
   @Get('backend/backend_response')
   async WebhookTest() {
-    console.log('log here');
     return {
       success: 'ok'
     }
