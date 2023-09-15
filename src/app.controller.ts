@@ -1,6 +1,8 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AppService } from './app.service';
 import { WallexWebhookDto } from './dto/wallex.dto';
+import { IPayPaymentResponseDto } from './dto/ipay.dto';
 import { lastValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Agent } from 'https';
@@ -48,5 +50,20 @@ export class AppController {
       success: 'ok',
       data
     }
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('payment/ipay88/backend/backend_response')
+  async backendPostResponse(@Body() data: IPayPaymentResponseDto, @Res({ passthrough: true }) res: Response) {
+    console.log('backendPostResponse');
+    console.log(data);
+    res.setHeader('Content-Type', 'text/plain');
+    const qs = this.appService.buildResponseSignature(data.PaymentId, data.RefNo, data.Amount, data.Currency, data.Status);
+    let r = 'Fail';
+    if (data.Status == '1' && qs === data.Signature) {
+      r = 'RECEIVEOK';
+    }
+
+    return r;
   }
 }
